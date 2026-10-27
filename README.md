@@ -3,7 +3,7 @@
 **Sistema Didático de Votação Eletrônica com Mecanismos Criptográficos**
 
 
-\
+
 
 
 ## 1. Sobre o projeto
