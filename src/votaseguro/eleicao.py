@@ -48,12 +48,19 @@ def obter_eleicao(db, id_eleicao):
 def iniciar_eleicao(db, id_eleicao):
     """Inicia uma eleição, alterando seu status para 'EM_ANDAMENTO'."""
     conexao = db.conexao
-    conexao.execute(
+    cursor = conexao.execute(
         """
         UPDATE eleicoes
         SET status = 'EM_ANDAMENTO' 
-        WHERE id = ?""", (id_eleicao,)
+        WHERE id = ?
+        AND status = 'CONFIGURADA'
+        """, (id_eleicao,)
     )
+    if cursor.rowcount == 0:
+        raise ValueError(
+            "Eleição inexistente ou que não está configurada."
+        )
+    
     conexao.commit()    
 
 def encerrar_eleicao(db, id_eleicao):

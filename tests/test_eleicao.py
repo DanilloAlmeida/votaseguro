@@ -149,6 +149,36 @@ def test_nao_encerrar_eleicao_ja_encerrada(tmp_path):
         # Verificar se o status da eleição permanece como "ENCERRADA"
         assert eleicao["status"] == "ENCERRADA"
 
+def test_nao_iniciar_eleicao_ja_iniciada(tmp_path):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        id_eleicao = cadastrar_eleicao(db, "Eleição A")
+
+        iniciar_eleicao(db, id_eleicao)
+
+        with pytest.raises(ValueError):
+            iniciar_eleicao(db, id_eleicao)
+
+        eleicao = obter_eleicao(db, id_eleicao)
+
+        assert eleicao["status"] == "EM_ANDAMENTO"
+
+def test_nao_iniciar_eleicao_encerrada(tmp_path):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        id_eleicao = cadastrar_eleicao(db, "Eleição A")
+
+        iniciar_eleicao(db, id_eleicao)
+        encerrar_eleicao(db, id_eleicao)
+
+        with pytest.raises(ValueError):
+            iniciar_eleicao(db, id_eleicao)
+
+        eleicao = obter_eleicao(db, id_eleicao)
+
+        assert eleicao["status"] == "ENCERRADA"
 
 
 
