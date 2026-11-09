@@ -44,3 +44,37 @@ def obter_eleicao(db, id_eleicao):
         "SELECT * FROM eleicoes WHERE id = ?", (id_eleicao,)
     )
     return cursor.fetchone()
+
+def iniciar_eleicao(db, id_eleicao):
+    """Inicia uma eleição, alterando seu status para 'EM_ANDAMENTO'."""
+    conexao = db.conexao
+    conexao.execute(
+        """
+        UPDATE eleicoes
+        SET status = 'EM_ANDAMENTO' 
+        WHERE id = ?""", (id_eleicao,)
+    )
+    conexao.commit()    
+
+def encerrar_eleicao(db, id_eleicao):
+    """Encerra uma eleição que esteja em andamento."""
+
+    conexao = db.conexao
+
+    cursor = conexao.execute(
+        """
+        UPDATE eleicoes
+        SET status = 'ENCERRADA',
+            atualizada_em = CURRENT_TIMESTAMP
+        WHERE id = ?
+        AND status = 'EM_ANDAMENTO'
+        """,
+        (id_eleicao,),
+    )
+
+    if cursor.rowcount == 0:
+        raise ValueError(
+            "Eleição inexistente ou que não está em andamento."
+        )
+
+    conexao.commit()  
