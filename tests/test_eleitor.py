@@ -18,3 +18,10 @@ def test_cadastrar_eleitor_valido(tmp_path):
         assert id_eleitor is not None
         assert eleitor["nome"] == "João Silva"
         assert eleitor["situacao"] == "VALIDA"
+
+def test_cadastrar_eleitor_rejeita_nome_vazio(tmp_path):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        with pytest.raises(ValueError):
+            cadastrar_eleitor(db, "")        

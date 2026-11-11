@@ -17,13 +17,14 @@ class Database:
             self.conexao = sqlite3.connect(self.caminho)
             self.conexao.row_factory = sqlite3.Row
             self.criar_tabela_eleicoes()
+            self.criar_tabela_eleitores()
         return self.conexao
 
     def criar_tabela_eleicoes(self) -> None:
-        """Cria a tabela eleicoes caso ela ainda não exista."""
+        """Abre a conexão e garante que as tabelas do sistema existam."""
         conexao = self.conexao
         if conexao is None:
-            raise RuntimeError("Abra a conexão antes de criar as tabelas.")
+            raise RuntimeError("Abra a conexão antes de criar as tabelas.")    
 
         conexao.execute(
             """
@@ -49,6 +50,24 @@ class Database:
                     OR data_fim IS NULL
                     OR data_fim > data_inicio
                 )
+            )
+            """
+        )
+
+        conexao.commit()
+
+    def criar_tabela_eleitores(self) -> None:        
+        """Cria a tabela eleitores caso ela ainda não exista."""
+        conexao = self.conexao
+        if conexao is None:
+            raise RuntimeError("Abra a conexão antes de criar as tabelas.")
+        conexao.execute(
+            """
+            CREATE TABLE IF NOT EXISTS eleitores (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL CHECK (length(trim(nome)) > 0),
+                situacao TEXT NOT NULL,
+                criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
