@@ -51,7 +51,7 @@ Os requisitos serão desenvolvidos progressivamente. A documentação distinguir
 | `secrets`      | Geração de valores aleatórios criptograficamente seguros |
 | `sqlite3`      | Acesso ao banco de dados SQLite                          |
 | `cryptography` | Operações de assinatura digital RSA, conforme necessário |
-| `unittest`     | Testes automatizados                                     |
+| `pytest`       | Testes automatizados                                     |
 | Git            | Controle de versão                                       |
 | GitHub         | Hospedagem do repositório e colaboração                  |
 
@@ -174,57 +174,107 @@ As fases poderão ser ajustadas conforme os resultados obtidos e o tempo dispon�
 
 ## 8. Ambiente de desenvolvimento
 
-O Ubuntu será o ambiente principal de desenvolvimento.
+O projeto utiliza Python 3.12 e busca compatibilidade com Ubuntu, Windows e macOS.
 
-Entretanto, o projeto buscará compatibilidade com Windows e macOS, evitando dependências específicas de um único sistema operacional.
+Recomenda-se utilizar um ambiente virtual para manter as dependências do projeto isoladas das bibliotecas do sistema.
 
-Use Python 3 e um ambiente virtual para manter as dependências do projeto isoladas das bibliotecas do sistema.
+### 8.1. Pré-requisitos
 
-No Ubuntu, instale o suporte a ambientes virtuais (caso ainda não esteja instalado):
+- Python 3.12.
+- Git.
+- Acesso ao repositório do projeto.
+
+### 8.2. Clonagem do repositório
+
+Clone o repositório e entre na pasta do projeto:
+
+```bash
+git clone <URL_DO_REPOSITORIO>
+cd votaseguro
+```
+
+### 8.3. Criação do ambiente virtual
+
+**Ubuntu e macOS**
+
+```bash
+python3.12 -m venv .venv
+```
+
+No Ubuntu, caso o suporte a ambientes virtuais ainda não esteja instalado:
 
 ```bash
 sudo apt update
-sudo apt install python3-venv
+sudo apt install python3.12-venv
 ```
 
-Na pasta do projeto, crie e ative o ambiente virtual:
+**Windows (PowerShell)**
+
+```powershell
+py -3.12 -m venv .venv
+```
+
+### 8.4. Ativação do ambiente virtual
+
+**Ubuntu e macOS**
 
 ```bash
-python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-O ambiente virtual precisa ser ativado novamente em cada novo terminal. Não é necessário recriá-lo nem reinstalar as dependências. Para sair do ambiente, use `deactivate`.
+**Windows (PowerShell)**
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Após a ativação, o terminal deverá indicar o ambiente virtual ativo, normalmente exibindo `(.venv)` no início da linha.
+
+O ambiente virtual precisa ser ativado novamente em cada novo terminal. Não é necessário recriá-lo a cada utilização.
+
+Para sair do ambiente, execute:
+
+```bash
+deactivate
+```
+
+### 8.5. Instalação das dependências
+
+Com o ambiente virtual ativado, instale as dependências do projeto:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### 8.6. Configuração no VS Code
+
+No Visual Studio Code, selecione o interpretador Python localizado em `.venv`.
+
+O caminho do interpretador é:
+
+- Ubuntu e macOS: `.venv/bin/python`
+- Windows: `.venv\Scripts\python.exe`
 
 ## 9. Testes e validação
 
-Os testes podem ser executados com o `unittest`, incluído na biblioteca padrão do Python:
+Os testes automatizados são implementados utilizando `pytest`.
 
-```bash
-python -m unittest discover -s tests
-```
-
-Também é possível executá-los com `pytest`. Com o ambiente virtual ativado, instale-o uma vez:
-
-```bash
-python -m pip install pytest
-```
-
-Depois, execute:
+Com o ambiente virtual ativado e as dependências instaladas, execute:
 
 ```bash
 python -m pytest
 ```
 
-No Windows, caso o comando `python` não esteja disponível, use o lançador do Python:
+Para executar os testes com informações mais detalhadas:
 
-```powershell
-py -m pytest
+```bash
+python -m pytest -v
 ```
 
 Cada componente deverá possuir testes que verifiquem seu comportamento.
 
 Os testes deverão abranger tanto os casos válidos quanto as tentativas de executar operações proibidas.
+
 
 Entre os cenários previstos estão:
 
@@ -249,6 +299,8 @@ Para facilitar a participação de outros desenvolvedores:
 - Os testes automatizados acompanharão a implementação.
 - As alterações serão registradas por meio de commits claros.
 - As novas funcionalidades deverão respeitar a arquitetura e os requisitos documentados.
+- O desenvolvimento seguirá um fluxo de trabalho baseado no GitHub Flow.
+- Cada integrante deverá manter seu próprio ambiente virtual e instalar as dependências a partir do `requirements.txt`.
 
 Antes de contribuir, recomenda-se consultar a especificação do MVP e o plano de desenvolvimento.
 
