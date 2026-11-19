@@ -2,9 +2,7 @@
 
 **Sistema Didático de Votação Eletrônica com Mecanismos Criptográficos**
 
-
-
-
+---
 
 ## 1. Sobre o projeto
 
@@ -43,23 +41,23 @@ Os requisitos serão desenvolvidos progressivamente. A documentação distinguir
 
 ## 4. Tecnologias
 
-| Tecnologia     | Finalidade                                               |
-| -------------- | -------------------------------------------------------- |
-| Python         | Linguagem principal                                      |
-| SQLite         | Persistência e consulta dos dados                        |
-| `hashlib`      | Funções hash                                             |
-| `secrets`      | Geração de valores aleatórios criptograficamente seguros |
-| `sqlite3`      | Acesso ao banco de dados SQLite                          |
+| Tecnologia | Finalidade |
+|---|---|
+| Python | Linguagem principal |
+| SQLite | Persistência e consulta dos dados |
+| `hashlib` | Funções hash |
+| `secrets` | Geração de valores aleatórios criptograficamente seguros |
+| `sqlite3` | Acesso ao banco de dados SQLite |
 | `cryptography` | Operações de assinatura digital RSA, conforme necessário |
-| `pytest`       | Testes automatizados                                     |
-| Git            | Controle de versão                                       |
-| GitHub         | Hospedagem do repositório e colaboração                  |
+| `pytest` | Testes automatizados |
+| Git | Controle de versão |
+| GitHub | Hospedagem do repositório e colaboração |
 
 A implementação do ElGamal exponencial e da apuração homomórfica será desenvolvida no próprio projeto, utilizando primitivas matemáticas básicas do Python.
 
 Não serão utilizadas bibliotecas prontas que implementem o protocolo completo de votação ou a cifragem homomórfica exigida pelo trabalho.
 
-As dependências externas serão mantidas sob controle e documentadas.
+As dependências externas serão mantidas sob controle e documentadas no arquivo `requirements.txt`.
 
 ## 5. Visão geral da aplicação
 
@@ -86,17 +84,17 @@ A organização definitiva dos menus e dos componentes será documentada em `doc
 
 A aplicação será organizada em componentes com responsabilidades bem definidas.
 
-| Componente                | Responsabilidade                                                  |
-| ------------------------- | ----------------------------------------------------------------- |
-| Interface CLI             | Receber comandos e apresentar informações ao usuário              |
-| Gerenciamento de eleições | Controlar a configuração e o estado de cada eleição               |
-| Cadastro de eleitores     | Manter os participantes autorizados e suas chaves públicas        |
-| Cédulas                   | Representar os votos e seus registros criptográficos              |
-| Módulo criptográfico      | Implementar o ElGamal exponencial e a apuração homomórfica        |
-| Autoridades eleitorais    | Participar da geração da chave conjunta e da apuração             |
-| Quadro público            | Manter os registros das cédulas e o encadeamento por hashes       |
-| Banco de dados            | Persistir os dados estruturados de cada eleição                   |
-| Auditor independente      | Verificar os dados públicos sem depender da confiança no servidor |
+| Componente | Responsabilidade |
+|---|---|
+| Interface CLI | Receber comandos e apresentar informações ao usuário |
+| Gerenciamento de eleições | Controlar a configuração e o estado de cada eleição |
+| Cadastro de eleitores | Manter os participantes autorizados e suas chaves públicas |
+| Cédulas | Representar os votos e seus registros criptográficos |
+| Módulo criptográfico | Implementar o ElGamal exponencial e a apuração homomórfica |
+| Autoridades eleitorais | Participar da geração da chave conjunta e da apuração |
+| Quadro público | Manter os registros das cédulas e o encadeamento por hashes |
+| Banco de dados | Persistir os dados estruturados de cada eleição |
+| Auditor independente | Verificar os dados públicos sem depender da confiança no servidor |
 
 Essa arquitetura é uma proposta inicial e poderá ser refinada durante o desenvolvimento.
 
@@ -110,20 +108,21 @@ O projeto será desenvolvido em fases progressivas, cada uma com objetivos e cri
 
 ### Fase 0 — Planejamento e ambiente
 
-- [ ] Criar o repositório.
-- [ ] Documentar o escopo inicial.
-- [ ] Preparar o ambiente Python.
-- [ ] Definir a estrutura do projeto.
-- [ ] Estabelecer as primeiras convenções de desenvolvimento.
+- [x] Criar o repositório.
+- [x] Documentar o escopo inicial.
+- [x] Preparar o ambiente Python.
+- [x] Definir a estrutura do projeto.
+- [x] Estabelecer as primeiras convenções de desenvolvimento.
 
 ### Fase 1 — Fluxo básico de votação
 
 - [ ] Criar a interface de linha de comando.
 - [ ] Configurar eleições e candidatos.
-- [ ] Cadastrar eleitores e autoridades.
+- [x] Iniciar o cadastro de eleitores e eleições.
+- [ ] Cadastrar autoridades.
 - [ ] Implementar o ciclo de vida da eleição.
 - [ ] Registrar votos e impedir duplicidades.
-- [ ] Persistir os dados no SQLite.
+- [x] Iniciar a persistência dos dados no SQLite.
 
 Esta fase utilizará inicialmente uma lógica simplificada, sem alegar que o sistema já oferece as garantias criptográficas exigidas.
 
@@ -189,23 +188,31 @@ Recomenda-se utilizar um ambiente virtual para manter as dependências do projet
 Clone o repositório e entre na pasta do projeto:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/DanilloAlmeida/votaseguro
 cd votaseguro
 ```
 
 ### 8.3. Criação do ambiente virtual
 
-**Ubuntu e macOS**
+**Ubuntu**
+
+Caso o suporte a ambientes virtuais ainda não esteja instalado:
+
+```bash
+sudo apt update
+sudo apt install python3.12-venv
+```
+
+Depois, crie o ambiente virtual:
 
 ```bash
 python3.12 -m venv .venv
 ```
 
-No Ubuntu, caso o suporte a ambientes virtuais ainda não esteja instalado:
+**macOS**
 
 ```bash
-sudo apt update
-sudo apt install python3.12-venv
+python3.12 -m venv .venv
 ```
 
 **Windows (PowerShell)**
@@ -275,7 +282,6 @@ Cada componente deverá possuir testes que verifiquem seu comportamento.
 
 Os testes deverão abranger tanto os casos válidos quanto as tentativas de executar operações proibidas.
 
-
 Entre os cenários previstos estão:
 
 - Registro de uma cédula válida.
@@ -290,9 +296,9 @@ A existência de testes bem-sucedidos não será interpretada, isoladamente, com
 
 ## 10. Colaboração
 
-O desenvolvimento começará individualmente, com a possibilidade de incorporar colaboradores posteriormente.
+O desenvolvimento será realizado de forma colaborativa, seguindo práticas de controle de versão, revisão de código e integração incremental das funcionalidades.
 
-Para facilitar a participação de outros desenvolvedores:
+Para facilitar a participação dos desenvolvedores:
 
 - As funcionalidades serão divididas em componentes.
 - As decisões técnicas serão documentadas.
@@ -329,6 +335,6 @@ Antes da entrega, o pacote será extraído em um ambiente separado e testado par
 
 ---
 
-**Status do projeto:** planejamento e definição do escopo.
+**Status do projeto:** desenvolvimento inicial — estrutura básica, persistência e cadastro de eleitores e eleições.
 
-**Próximo objetivo:** criar o ambiente inicial, documentar a especificação do MVP e estabelecer os primeiros testes automatizados.
+**Próximo objetivo:** ampliar as funcionalidades de cadastro e gerenciamento, mantendo a abordagem incremental e orientada por testes.
