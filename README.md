@@ -216,6 +216,12 @@ Depois, execute:
 python -m pytest
 ```
 
+No Windows, caso o comando `python` não esteja disponível, use o lançador do Python:
+
+```powershell
+py -m pytest
+```
+
 Cada componente deverá possuir testes que verifiquem seu comportamento.
 
 Os testes deverão abranger tanto os casos válidos quanto as tentativas de executar operações proibidas.
