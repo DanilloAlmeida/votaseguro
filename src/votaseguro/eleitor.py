@@ -3,8 +3,15 @@
 def cadastrar_eleitor(db, nome):
     """Cadastra um eleitor e retorna seu identificador."""
 
-    if not nome or not nome.strip():
-        raise ValueError("O nome do eleitor não pode ser vazio.")
+    nome_vazio = not nome
+    espacos_nas_extremidades = nome != nome.strip()
+    espacos_consecutivos = "  " in nome
+
+    if nome_vazio or espacos_nas_extremidades or espacos_consecutivos:
+        raise ValueError(
+            "O nome não pode ser vazio, começar ou terminar com espaços "
+            "nem conter espaços consecutivos."
+        )
 
     conexao = db.conexao
 
