@@ -178,11 +178,43 @@ O Ubuntu será o ambiente principal de desenvolvimento.
 
 Entretanto, o projeto buscará compatibilidade com Windows e macOS, evitando dependências específicas de um único sistema operacional.
 
-A versão do Python e as dependências serão documentadas para permitir a reprodução do ambiente.
+Use Python 3 e um ambiente virtual para manter as dependências do projeto isoladas das bibliotecas do sistema.
 
-As instruções completas de instalação e execução serão adicionadas conforme a aplicação se tornar executável.
+No Ubuntu, instale o suporte a ambientes virtuais (caso ainda não esteja instalado):
+
+```bash
+sudo apt update
+sudo apt install python3-venv
+```
+
+Na pasta do projeto, crie e ative o ambiente virtual:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+O ambiente virtual precisa ser ativado novamente em cada novo terminal. Não é necessário recriá-lo nem reinstalar as dependências. Para sair do ambiente, use `deactivate`.
 
 ## 9. Testes e validação
+
+Os testes podem ser executados com o `unittest`, incluído na biblioteca padrão do Python:
+
+```bash
+python -m unittest discover -s tests
+```
+
+Também é possível executá-los com `pytest`. Com o ambiente virtual ativado, instale-o uma vez:
+
+```bash
+python -m pip install pytest
+```
+
+Depois, execute:
+
+```bash
+python -m pytest
+```
 
 Cada componente deverá possuir testes que verifiquem seu comportamento.
 
