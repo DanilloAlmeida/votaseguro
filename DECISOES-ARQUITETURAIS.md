@@ -87,7 +87,7 @@ A utilização de um identificador interno atende às necessidades didáticas do
 
 ### DA-004 — Situação inicial dos eleitores
 
-**Status:** Aceita.
+**Status:** Substituída pela DA-008.
 
 **Contexto:**
 
@@ -133,7 +133,7 @@ As alterações nas regras de domínio deverão ser realizadas prioritariamente 
 
 ### DA-006 — Cadastro único de eleitores e controle de participação por eleição
 
-**Status:** Aceita como diretriz de modelagem.
+**Status:** Substituída pela DA-008.
 
 **Contexto:**
 
@@ -153,28 +153,113 @@ Essa estrutura evita a duplicação dos dados cadastrais e permite controlar sep
 
 A modelagem deverá contemplar uma estrutura de relacionamento entre eleitores e eleições, permitindo registrar se determinado eleitor já votou em determinada eleição.
 
+---
+
 ### DA-007 — Validação do nome do eleitor
+
+**Status:** Aceita.
 
 **Contexto:**
 
-Evitar inconsistências nos dados cadastrais causadas por espaços
-inseridos acidentalmente durante a digitação do nome.
+Evitar inconsistências nos dados cadastrais causadas por espaços inseridos acidentalmente durante a digitação do nome.
 
 **Decisão:**
 
-Rejeitar nomes vazios, com espaços em branco nas extremidades
-ou com dois ou mais espaços consecutivos entre as partes do nome.
+Rejeitar nomes vazios, com espaços em branco nas extremidades ou com dois ou mais espaços consecutivos entre as partes do nome.
+
 O sistema não realizará correções automáticas.
 
 **Justificativa:**
 
-Evitar que diferenças acidentais na digitação produzam cadastros
-inconsistentes e dificultem a localização de eleitores.
+Evitar que diferenças acidentais na digitação produzam cadastros inconsistentes e dificultem a localização de eleitores.
 
 **Consequências:**
 
 O usuário deverá corrigir a entrada e informar novamente o nome.
+
 A validação será realizada pela camada de negócio.
+
+---
+
+### DA-008 — Cadastro global e situação dos eleitores
+
+**Status:** Aceita.
+
+**Contexto:**
+
+O sistema precisa controlar a elegibilidade dos eleitores sem criar associações individuais de participação entre eleitores e eleições.
+
+Um mesmo eleitor poderá participar de diferentes eleições, mas não poderá votar mais de uma vez na mesma eleição.
+
+**Decisão:**
+
+Manter um cadastro global e único de eleitores, independente das eleições.
+
+Todo eleitor cadastrado receberá inicialmente a situação `APTO`.
+
+A situação poderá assumir os seguintes valores:
+
+- `APTO`: eleitor autorizado a participar das eleições.
+- `INAPTO`: eleitor impedido de participar das eleições.
+
+Somente o administrador poderá alterar a situação de um eleitor.
+
+Todo eleitor com situação `APTO` estará automaticamente habilitado a participar de qualquer eleição em andamento, desde que possua seu par de chaves cadastrado antes do início da votação.
+
+Não haverá associação individual prévia entre eleitores e eleições para definir a participação.
+
+A unicidade do voto será controlada individualmente por eleição, utilizando a combinação do identificador do eleitor e do identificador da eleição.
+
+**Justificativa:**
+
+A manutenção de um cadastro global simplifica o modelo de dados, evita duplicação de informações e centraliza o controle da elegibilidade.
+
+O controle de unicidade por eleição permite que um mesmo eleitor participe de diferentes eleições, sem possibilidade de votar mais de uma vez na mesma eleição.
+
+**Consequências:**
+
+- A situação inicial dos eleitores será definida pela camada de negócio Python.
+- O cadastro não dependerá de uma tabela de associação entre eleitores e eleições.
+- A estrutura de votos deverá garantir a unicidade da combinação entre eleitor e eleição.
+- A situação global do eleitor será utilizada para determinar sua elegibilidade nas eleições que forem iniciadas.
+- Os eleitores deverão possuir suas chaves cadastradas antes do início da votação.
+
+---
+
+### DA-009 — Congelamento do cadastro de eleitores durante eleições em andamento
+
+**Status:** Aceita.
+
+**Contexto:**
+
+O sistema precisa preservar a estabilidade do cadastro de eleitores e das condições de elegibilidade durante a votação.
+
+Alterações cadastrais durante uma eleição poderiam modificar o conjunto de eleitores habilitados e comprometer a consistência do processo eleitoral.
+
+**Decisão:**
+
+Enquanto existir pelo menos uma eleição com situação `EM_ANDAMENTO`, o cadastro geral de eleitores permanecerá congelado.
+
+Durante esse período, serão proibidas as seguintes operações:
+
+- Inclusão de novos eleitores.
+- Exclusão de eleitores.
+- Alteração da situação de eleitores entre `APTO` e `INAPTO`.
+
+As operações de consulta ao cadastro continuarão permitidas.
+
+O cadastro será liberado novamente quando não existir nenhuma eleição em situação `EM_ANDAMENTO`.
+
+**Justificativa:**
+
+O congelamento preserva o conjunto de eleitores habilitados durante a votação, impedindo alterações que possam interferir na elegibilidade e na contagem de votos.
+
+**Consequências:**
+
+- A abertura de uma eleição deverá considerar os eleitores aptos existentes no momento de seu início.
+- A quantidade de eleitores aptos permanecerá estável durante a votação.
+- O encerramento antecipado poderá ocorrer quando todos os eleitores aptos tiverem votado.
+- Se houver mais de uma eleição em andamento, o cadastro permanecerá congelado até que todas sejam encerradas.
 
 ---
 
@@ -186,7 +271,7 @@ Com base nas decisões anteriores, a entidade `eleitores` deverá contemplar ini
 |---|---|
 | `id` | Identificador único gerado pelo SQLite |
 | `nome` | Nome do eleitor |
-| `situacao` | Situação atual do eleitor |
+| `situacao` | Situação global do eleitor: `APTO` ou `INAPTO` |
 | `criado_em` | Data e hora do cadastro |
 
 A estrutura definitiva será implementada e validada durante o desenvolvimento do módulo de eleitores.
