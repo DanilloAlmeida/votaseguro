@@ -153,6 +153,29 @@ Essa estrutura evita a duplicação dos dados cadastrais e permite controlar sep
 
 A modelagem deverá contemplar uma estrutura de relacionamento entre eleitores e eleições, permitindo registrar se determinado eleitor já votou em determinada eleição.
 
+### DA-007 — Validação do nome do eleitor
+
+**Contexto:**
+
+Evitar inconsistências nos dados cadastrais causadas por espaços
+inseridos acidentalmente durante a digitação do nome.
+
+**Decisão:**
+
+Rejeitar nomes vazios, com espaços em branco nas extremidades
+ou com dois ou mais espaços consecutivos entre as partes do nome.
+O sistema não realizará correções automáticas.
+
+**Justificativa:**
+
+Evitar que diferenças acidentais na digitação produzam cadastros
+inconsistentes e dificultem a localização de eleitores.
+
+**Consequências:**
+
+O usuário deverá corrigir a entrada e informar novamente o nome.
+A validação será realizada pela camada de negócio.
+
 ---
 
 ## 3. Modelo inicial da entidade Eleitor

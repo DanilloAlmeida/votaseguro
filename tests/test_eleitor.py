@@ -24,4 +24,20 @@ def test_cadastrar_eleitor_rejeita_nome_vazio(tmp_path):
 
     with Database(caminho_db) as db:
         with pytest.raises(ValueError):
-            cadastrar_eleitor(db, "")        
+            cadastrar_eleitor(db, "")
+
+def test_cadastrar_eleitor_rejeita_nome_com_apenas_espacos(tmp_path):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        with pytest.raises(ValueError):
+            cadastrar_eleitor(db, "   ")
+
+@pytest.mark.parametrize("nome", ["João  Silva", "João   Silva", "João    Silva"])
+
+def test_cadastrar_eleitor_rejeita_nome_com_espacos_excessivos(tmp_path, nome):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        with pytest.raises(ValueError):
+            cadastrar_eleitor(db, nome)
