@@ -338,3 +338,5 @@ Antes da entrega, o pacote será extraído em um ambiente separado e testado par
 **Status do projeto:** desenvolvimento inicial — estrutura básica, persistência e cadastro de eleitores e eleições.
 
 **Próximo objetivo:** ampliar as funcionalidades de cadastro e gerenciamento, mantendo a abordagem incremental e orientada por testes.
+atualizando
+
