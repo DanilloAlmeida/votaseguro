@@ -83,3 +83,26 @@ def test_rejeita_data_final_anterior_ao_inicio(tmp_path):
                     "2026-11-09T10:00:00",
                 ),
             )
+
+def test_criar_tabela_pessoas(tmp_path):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        cursor = db.conexao.execute(
+            """
+            PRAGMA table_info(pessoas)
+            """
+        )
+
+        colunas = {
+            linha["name"]
+            for linha in cursor.fetchall()
+        }
+
+        assert colunas == {
+            "id",
+            "nome",
+            "papel",
+            "situacao",
+            "criado_em",
+        }

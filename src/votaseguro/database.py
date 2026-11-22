@@ -18,6 +18,7 @@ class Database:
             self.conexao.row_factory = sqlite3.Row
             self.criar_tabela_eleicoes()
             self.criar_tabela_eleitores()
+            self.criar_tabela_pessoas()
         return self.conexao
 
     def criar_tabela_eleicoes(self) -> None:
@@ -40,7 +41,8 @@ class Database:
                         status IN (
                             'CONFIGURADA',
                             'EM_ANDAMENTO',
-                            'ENCERRADA'
+                            'EM_APURACAO',
+                            'APURADA'
                         )
                     ),
                 criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -71,6 +73,28 @@ class Database:
             )
             """
         )
+        conexao.commit()
+
+    def criar_tabela_pessoas(self) -> None:
+        """Cria a tabela pessoas caso ela ainda não exista."""
+        conexao = self.conexao
+
+        if conexao is None:
+            raise RuntimeError("Abra a conexão antes de criar as tabelas.")
+
+        conexao.execute(
+            """
+            CREATE TABLE IF NOT EXISTS pessoas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL
+                    CHECK (length(trim(nome)) > 0),
+                papel TEXT NOT NULL,
+                situacao TEXT NOT NULL,
+                criado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
         conexao.commit()
 
     def fechar(self) -> None:

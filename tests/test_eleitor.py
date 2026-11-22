@@ -1,8 +1,10 @@
 import pytest
 
 from votaseguro.database import Database
-from votaseguro.eleitor import cadastrar_eleitor
-
+from votaseguro.eleitor import (
+    cadastrar_eleitor,
+    contar_eleitores_aptos,
+)
 
 def test_cadastrar_eleitor_valido(tmp_path):
     caminho_db = tmp_path / "teste.db"
@@ -17,7 +19,7 @@ def test_cadastrar_eleitor_valido(tmp_path):
 
         assert id_eleitor is not None
         assert eleitor["nome"] == "João Silva"
-        assert eleitor["situacao"] == "VALIDA"
+        assert eleitor["situacao"] == "APTO"
 
 def test_cadastrar_eleitor_rejeita_nome_vazio(tmp_path):
     caminho_db = tmp_path / "teste.db"
@@ -41,3 +43,15 @@ def test_cadastrar_eleitor_rejeita_nome_com_espacos_excessivos(tmp_path, nome):
     with Database(caminho_db) as db:
         with pytest.raises(ValueError):
             cadastrar_eleitor(db, nome)
+
+def test_contar_eleitores_aptos(tmp_path):
+    caminho_db = tmp_path / "teste.db"
+
+    with Database(caminho_db) as db:
+        cadastrar_eleitor(db, "João Silva")
+        cadastrar_eleitor(db, "Maria Souza")
+        cadastrar_eleitor(db, "Pedro Santos")
+
+        quantidade = contar_eleitores_aptos(db)
+
+        assert quantidade == 3

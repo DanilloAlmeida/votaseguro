@@ -20,9 +20,25 @@ def cadastrar_eleitor(db, nome):
         INSERT INTO eleitores (nome, situacao)
         VALUES (?, ?)
         """,
-        (nome, "VALIDA")
+        (nome, "APTO")
     )
 
     conexao.commit()
 
     return cursor.lastrowid
+
+def contar_eleitores_aptos(db):
+    """Retorna a quantidade de eleitores aptos."""
+
+    conexao = db.conexao
+
+    cursor = conexao.execute(
+        """
+        SELECT COUNT(*)
+        FROM eleitores
+        WHERE situacao = ?
+        """,
+        ("APTO",)
+    )
+
+    return cursor.fetchone()[0]

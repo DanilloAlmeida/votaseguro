@@ -1,5 +1,7 @@
 """Operações de negócio relacionadas às eleições."""
 
+from votaseguro.eleitor import contar_eleitores_aptos
+
 def cadastrar_eleicao(
     db,
     nome,
@@ -45,23 +47,37 @@ def obter_eleicao(db, id_eleicao):
     )
     return cursor.fetchone()
 
+
 def iniciar_eleicao(db, id_eleicao):
     """Inicia uma eleição, alterando seu status para 'EM_ANDAMENTO'."""
-    conexao = db.conexao
-    cursor = conexao.execute(
-        """
-        UPDATE eleicoes
-        SET status = 'EM_ANDAMENTO' 
-        WHERE id = ?
-        AND status = 'CONFIGURADA'
-        """, (id_eleicao,)
-    )
-    if cursor.rowcount == 0:
+
+    eleicao = obter_eleicao(db, id_eleicao)
+
+    if eleicao is None or eleicao["status"] != "CONFIGURADA":
         raise ValueError(
             "Eleição inexistente ou que não está configurada."
         )
+
+    quantidade_eleitores = contar_eleitores_aptos(db)
+
+    if quantidade_eleitores < 3:
+        raise ValueError(
+            "A eleição exige pelo menos três eleitores aptos."
+        )
+
+    conexao = db.conexao
+
+    conexao.execute(
+        """
+        UPDATE eleicoes
+        SET status = 'EM_ANDAMENTO'
+        WHERE id = ?
+        """,
+        (id_eleicao,)
+    )
+
+    conexao.commit()
     
-    conexao.commit()    
 
 def encerrar_eleicao(db, id_eleicao):
     """Encerra uma eleição que esteja em andamento."""
@@ -71,7 +87,7 @@ def encerrar_eleicao(db, id_eleicao):
     cursor = conexao.execute(
         """
         UPDATE eleicoes
-        SET status = 'ENCERRADA',
+        SET status = 'EM_APURACAO',
             atualizada_em = CURRENT_TIMESTAMP
         WHERE id = ?
         AND status = 'EM_ANDAMENTO'

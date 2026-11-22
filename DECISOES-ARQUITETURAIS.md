@@ -1,11 +1,13 @@
-# VotaSeguro — Registro de Decisões Arquiteturais
+from pathlib import Path
+
+content = r"""# VotaSeguro — Registro de Decisões Arquiteturais
 
 **Projeto:** VotaSeguro — Sistema Didático de Votação Eletrônica  
 **Disciplina:** Segurança Computacional — UnB  
 **Tecnologias:** Python e SQLite  
 **Documento:** Decisões Arquiteturais  
-**Versão:** 01  
-**Data:** 10/11/2026
+**Versão:** 02  
+**Data:** 22/11/2026
 
 ---
 
@@ -65,17 +67,17 @@ Também permite que diferentes interfaces, como CLI e uma eventual aplicação W
 
 ---
 
-### DA-003 — Identificação dos eleitores por ID interno
+### DA-003 — Identificação das pessoas por ID interno
 
 **Status:** Aceita.
 
 **Contexto:**
 
-O sistema necessita identificar individualmente os eleitores, sem depender de documentos pessoais reais.
+O sistema necessita identificar individualmente as pessoas cadastradas, sem depender de documentos pessoais reais.
 
 **Decisão:**
 
-Utilizar o campo `id`, gerado automaticamente pelo SQLite, como identificador único do eleitor.
+Utilizar o campo `id`, gerado automaticamente pelo SQLite, como identificador único de cada pessoa.
 
 Não serão utilizados CPF, número de título eleitoral ou outros documentos pessoais reais.
 
@@ -131,31 +133,31 @@ As alterações nas regras de domínio deverão ser realizadas prioritariamente 
 
 ---
 
-### DA-006 — Cadastro único de eleitores e controle de participação por eleição
+### DA-006 — Cadastro único e controle de participação por eleição
 
-**Status:** Substituída pela DA-008.
+**Status:** Substituída parcialmente pela DA-008 e complementada pelas DA-010 e DA-011.
 
 **Contexto:**
 
-Um mesmo eleitor poderá participar de diferentes eleições, mas não poderá votar mais de uma vez na mesma eleição.
+Uma mesma pessoa poderá participar de diferentes eleições, mas não poderá votar mais de uma vez na mesma eleição.
 
 **Decisão:**
 
-Manter o cadastro geral do eleitor independente das eleições.
+Manter um cadastro geral e único de pessoas, independente das eleições.
 
 O controle de participação e de realização do voto será associado individualmente a cada eleição.
 
 **Justificativa:**
 
-Essa estrutura evita a duplicação dos dados cadastrais e permite controlar separadamente a participação do eleitor em diferentes eleições.
+Essa estrutura evita a duplicação dos dados cadastrais e permite controlar separadamente a participação da pessoa em diferentes eleições.
 
 **Consequências:**
 
-A modelagem deverá contemplar uma estrutura de relacionamento entre eleitores e eleições, permitindo registrar se determinado eleitor já votou em determinada eleição.
+A estrutura de votos deverá garantir a unicidade da combinação entre o identificador da pessoa e o identificador da eleição.
 
 ---
 
-### DA-007 — Validação do nome do eleitor
+### DA-007 — Validação do nome da pessoa
 
 **Status:** Aceita.
 
@@ -171,7 +173,7 @@ O sistema não realizará correções automáticas.
 
 **Justificativa:**
 
-Evitar que diferenças acidentais na digitação produzam cadastros inconsistentes e dificultem a localização de eleitores.
+Evitar que diferenças acidentais na digitação produzam cadastros inconsistentes e dificultem a localização de pessoas.
 
 **Consequências:**
 
@@ -181,70 +183,68 @@ A validação será realizada pela camada de negócio.
 
 ---
 
-### DA-008 — Cadastro global e situação dos eleitores
+### DA-008 — Cadastro global e situação eleitoral
 
-**Status:** Aceita.
+**Status:** Aceita, complementada pelas DA-010 e DA-012.
 
 **Contexto:**
 
-O sistema precisa controlar a elegibilidade dos eleitores sem criar associações individuais de participação entre eleitores e eleições.
+O sistema precisa controlar a elegibilidade das pessoas sem criar associações individuais prévias entre pessoas e eleições para definir quem poderá votar.
 
-Um mesmo eleitor poderá participar de diferentes eleições, mas não poderá votar mais de uma vez na mesma eleição.
+Uma mesma pessoa poderá participar de diferentes eleições, mas não poderá votar mais de uma vez na mesma eleição.
 
 **Decisão:**
 
-Manter um cadastro global e único de eleitores, independente das eleições.
+Manter um cadastro global e único de pessoas, independente das eleições.
 
-Todo eleitor cadastrado receberá inicialmente a situação `APTO`.
+Toda pessoa cadastrada receberá inicialmente a situação `APTO`.
 
 A situação poderá assumir os seguintes valores:
 
-- `APTO`: eleitor autorizado a participar das eleições.
-- `INAPTO`: eleitor impedido de participar das eleições.
+- `APTO`: pessoa habilitada a votar e, observadas as demais regras, a candidatar-se ou exercer a administração do sistema.
+- `INAPTO`: pessoa impedida de votar, candidatar-se ou exercer a administração do sistema.
 
-Somente o administrador poderá alterar a situação de um eleitor.
+A situação eleitoral será independente do papel atual da pessoa, mas a condição `INAPTO` impedirá o exercício de qualquer papel além da manutenção do cadastro para consulta e preservação histórica.
 
-Todo eleitor com situação `APTO` estará automaticamente habilitado a participar de qualquer eleição em andamento, desde que possua seu par de chaves cadastrado antes do início da votação.
-
-Não haverá associação individual prévia entre eleitores e eleições para definir a participação.
-
-A unicidade do voto será controlada individualmente por eleição, utilizando a combinação do identificador do eleitor e do identificador da eleição.
+A unicidade do voto será controlada individualmente por eleição, utilizando a combinação do identificador da pessoa e do identificador da eleição.
 
 **Justificativa:**
 
 A manutenção de um cadastro global simplifica o modelo de dados, evita duplicação de informações e centraliza o controle da elegibilidade.
 
-O controle de unicidade por eleição permite que um mesmo eleitor participe de diferentes eleições, sem possibilidade de votar mais de uma vez na mesma eleição.
+O controle de unicidade por eleição permite que uma mesma pessoa participe de diferentes eleições, sem possibilidade de votar mais de uma vez na mesma eleição.
 
 **Consequências:**
 
-- A situação inicial dos eleitores será definida pela camada de negócio Python.
-- O cadastro não dependerá de uma tabela de associação entre eleitores e eleições.
-- A estrutura de votos deverá garantir a unicidade da combinação entre eleitor e eleição.
-- A situação global do eleitor será utilizada para determinar sua elegibilidade nas eleições que forem iniciadas.
-- Os eleitores deverão possuir suas chaves cadastradas antes do início da votação.
+- A situação inicial será definida pela camada de negócio Python.
+- O cadastro não dependerá de uma tabela de associação prévia entre pessoas e eleições para determinar a elegibilidade.
+- A estrutura de votos deverá garantir a unicidade da combinação entre pessoa e eleição.
+- Somente pessoas `APTO` poderão votar.
+- As pessoas deverão possuir suas chaves cadastradas antes do início da votação, conforme os requisitos do projeto.
 
 ---
 
-### DA-009 — Congelamento do cadastro de eleitores durante eleições em andamento
+### DA-009 — Congelamento do cadastro durante eleições em andamento
 
-**Status:** Aceita.
+**Status:** Aceita, ampliada pela DA-012.
 
 **Contexto:**
 
-O sistema precisa preservar a estabilidade do cadastro de eleitores e das condições de elegibilidade durante a votação.
+O sistema precisa preservar a estabilidade do cadastro de pessoas e das condições de elegibilidade durante a votação.
 
-Alterações cadastrais durante uma eleição poderiam modificar o conjunto de eleitores habilitados e comprometer a consistência do processo eleitoral.
+Alterações cadastrais durante uma eleição poderiam modificar o conjunto de pessoas habilitadas e comprometer a consistência do processo eleitoral.
 
 **Decisão:**
 
-Enquanto existir pelo menos uma eleição com situação `EM_ANDAMENTO`, o cadastro geral de eleitores permanecerá congelado.
+Enquanto existir pelo menos uma eleição com situação `EM_ANDAMENTO`, o cadastro global de pessoas permanecerá congelado.
 
 Durante esse período, serão proibidas as seguintes operações:
 
-- Inclusão de novos eleitores.
-- Exclusão de eleitores.
-- Alteração da situação de eleitores entre `APTO` e `INAPTO`.
+- Inclusão de novas pessoas.
+- Exclusão de pessoas.
+- Alteração da situação eleitoral entre `APTO` e `INAPTO`.
+- Alteração do papel entre `ELEITOR` e `ADMINISTRADOR`.
+- Qualquer outra operação que modifique os dados cadastrais ou a elegibilidade das pessoas.
 
 As operações de consulta ao cadastro continuarão permitidas.
 
@@ -252,29 +252,208 @@ O cadastro será liberado novamente quando não existir nenhuma eleição em sit
 
 **Justificativa:**
 
-O congelamento preserva o conjunto de eleitores habilitados durante a votação, impedindo alterações que possam interferir na elegibilidade e na contagem de votos.
+O congelamento preserva o conjunto de pessoas habilitadas durante a votação, impedindo alterações que possam interferir na elegibilidade e na contagem de votos.
 
 **Consequências:**
 
-- A abertura de uma eleição deverá considerar os eleitores aptos existentes no momento de seu início.
-- A quantidade de eleitores aptos permanecerá estável durante a votação.
-- O encerramento antecipado poderá ocorrer quando todos os eleitores aptos tiverem votado.
+- A abertura de uma eleição deverá considerar as pessoas aptas existentes no momento de seu início.
+- A quantidade de pessoas aptas permanecerá estável durante a votação.
+- O encerramento antecipado poderá ocorrer quando todas as pessoas aptas tiverem votado.
 - Se houver mais de uma eleição em andamento, o cadastro permanecerá congelado até que todas sejam encerradas.
+- A regra deverá ser aplicada na camada de negócio a todas as operações de alteração cadastral, e não apenas à interface CLI.
 
 ---
 
-## 3. Modelo inicial da entidade Eleitor
+### DA-010 — Cadastro único de pessoas e separação entre papel e candidatura
 
-Com base nas decisões anteriores, a entidade `eleitores` deverá contemplar inicialmente os seguintes campos:
+**Status:** Aceita.
+
+**Contexto:**
+
+O sistema precisa cadastrar pessoas que poderão atuar como eleitoras ou administradoras e também registrar candidaturas. Manter cadastros independentes para cada uma dessas condições provocaria duplicação de informações pessoais.
+
+Também é necessário permitir que uma pessoa candidata continue exercendo seu direito de voto, desde que esteja apta.
+
+**Decisão:**
+
+Manter uma única entidade de cadastro, denominada `pessoas`.
+
+Cada pessoa terá um papel cadastral, que poderá assumir os seguintes valores:
+
+- `ELEITOR`: papel atribuído automaticamente no cadastro.
+- `ADMINISTRADOR`: papel atribuído por uma operação autorizada de promoção.
+
+A condição de candidato não será armazenada como um papel permanente da pessoa. Uma candidatura será registrada em uma estrutura própria, associando a pessoa à eleição específica.
+
+Toda pessoa será cadastrada inicialmente com:
+
+- `papel = ELEITOR`;
+- `situacao = APTO`.
+
+Uma pessoa poderá ser candidata em uma eleição e continuar sendo eleitora, podendo votar se estiver `APTO`.
+
+**Justificativa:**
+
+A separação entre o cadastro da pessoa e sua candidatura evita duplicação de dados e representa corretamente o fato de que uma candidatura pertence a uma eleição específica.
+
+A separação entre papel e situação eleitoral também evita confundir autorização administrativa com habilitação para votar.
+
+**Consequências:**
+
+- Os dados pessoais serão mantidos em um único cadastro.
+- A tabela de candidaturas deverá relacionar uma pessoa a uma eleição.
+- A candidatura não deverá substituir o papel `ELEITOR` da pessoa.
+- O modelo permitirá que uma pessoa participe como candidata em eleições diferentes, respeitadas as regras de elegibilidade e de incompatibilidade de papéis.
+- A pessoa candidata poderá votar uma única vez em cada eleição em que estiver habilitada.
+
+---
+
+### DA-011 — Regras de elegibilidade e incompatibilidade entre administração e candidatura
+
+**Status:** Aceita.
+
+**Contexto:**
+
+O sistema precisa impedir que pessoas sem habilitação eleitoral exerçam funções no processo e evitar que uma mesma pessoa seja administradora e candidata simultaneamente.
+
+**Decisão:**
+
+Somente pessoas com situação `APTO` poderão:
+
+- Registrar voto.
+- Ser cadastradas como candidatas.
+- Exercer o papel de `ADMINISTRADOR`.
+
+Uma pessoa não poderá ser simultaneamente `ADMINISTRADOR` e candidata.
+
+Para que uma pessoa administradora possa se candidatar, deverá primeiro deixar o papel de `ADMINISTRADOR` e retornar ao papel `ELEITOR`.
+
+Uma pessoa com situação `INAPTO` não poderá ser candidata nem administradora.
+
+Quando uma pessoa que esteja como `ADMINISTRADOR` passar para `INAPTO`, seu papel será alterado automaticamente para `ELEITOR`, mantendo-se sua situação como `INAPTO`.
+
+A alteração não excluirá o cadastro da pessoa nem seus registros históricos.
+
+**Justificativa:**
+
+A regra mantém a coerência entre habilitação eleitoral e participação nas funções do sistema, além de impedir o acúmulo das condições de administrador e candidato.
+
+**Consequências:**
+
+- A camada de negócio deverá validar a situação eleitoral antes de permitir voto, candidatura ou promoção a administrador.
+- A camada de negócio deverá impedir a candidatura de uma pessoa que ainda esteja como administradora.
+- A alteração para `INAPTO` deverá retirar as permissões administrativas, retornando o papel cadastral para `ELEITOR`.
+- Os registros históricos de candidaturas serão preservados. A consequência operacional de uma inaptidão sobre uma candidatura já registrada deverá ser tratada sem apagar seu histórico.
+- As alterações cadastrais deverão respeitar o congelamento definido na DA-009 e na DA-012.
+
+---
+
+### DA-012 — Congelamento de todas as alterações no cadastro de pessoas
+
+**Status:** Aceita. Complementa e detalha a DA-009.
+
+**Contexto:**
+
+O modelo de cadastro passou a contemplar, além da situação eleitoral, o papel da pessoa e os vínculos de candidatura. É necessário garantir que nenhuma alteração nesses dados modifique as condições de participação durante uma eleição em andamento.
+
+**Decisão:**
+
+Enquanto existir pelo menos uma eleição em situação `EM_ANDAMENTO`, nenhuma alteração no cadastro global de pessoas poderá ser realizada.
+
+Isso inclui:
+
+- Cadastrar ou excluir pessoas.
+- Alterar a situação eleitoral.
+- Alterar o papel cadastral.
+- Promover ou retirar uma pessoa do papel de administrador.
+- Realizar operações que alterem a elegibilidade de uma pessoa.
+
+As consultas continuarão permitidas.
+
+O congelamento será encerrado somente quando não existir nenhuma eleição em andamento.
+
+**Justificativa:**
+
+A regra preserva a estabilidade do cadastro global e evita que mudanças de papel ou situação interfiram na votação.
+
+**Consequências:**
+
+- A verificação deverá considerar todas as eleições, e não apenas uma eleição específica.
+- Se duas ou mais eleições estiverem em andamento, o cadastro continuará congelado até que todas deixem esse estado.
+- A validação deverá estar centralizada na camada de negócio, de modo que qualquer interface utilize a mesma regra.
+
+---
+
+### DA-013 — Histórico de alterações de papel e situação eleitoral
+
+**Status:** Aceita.
+
+**Contexto:**
+
+O sistema precisa preservar a rastreabilidade das mudanças realizadas no cadastro das pessoas, permitindo identificar o que foi alterado, quando ocorreu e quem foi responsável pela operação.
+
+O cadastro principal deverá apresentar os valores atuais, enquanto os eventos anteriores deverão permanecer disponíveis para auditoria.
+
+**Decisão:**
+
+Manter registros históricos das alterações de papel e de situação eleitoral, sem sobrescrever ou excluir eventos anteriores.
+
+O histórico de alterações de papel deverá registrar, no mínimo:
+
+- Identificador da pessoa.
+- Papel anterior.
+- Papel novo.
+- Data e hora da alteração.
+- Identificador do responsável pela operação.
+- Motivo da alteração.
+
+O histórico de alterações de situação eleitoral deverá registrar, no mínimo:
+
+- Identificador da pessoa.
+- Situação anterior.
+- Situação nova.
+- Data e hora da alteração.
+- Identificador do responsável pela operação.
+- Motivo da alteração.
+
+Quando uma pessoa `ADMINISTRADOR` passar para `INAPTO`, a operação deverá atualizar seu papel para `ELEITOR` e registrar a mudança de papel no histórico, além de registrar a alteração da situação eleitoral.
+
+A atualização do cadastro e a gravação dos respectivos eventos históricos deverão ocorrer na mesma transação do banco de dados.
+
+**Justificativa:**
+
+O histórico permite reconstruir as alterações cadastrais e fornece rastreabilidade para auditorias. A separação dos históricos de papel e de situação mantém distintos dois conceitos de negócio.
+
+**Consequências:**
+
+- O cadastro principal armazenará apenas os valores atuais de papel e situação.
+- Os históricos serão estruturas próprias, com registros preservados.
+- Uma alteração cadastral não deverá ser considerada concluída se o respectivo registro histórico não puder ser gravado.
+- As operações deverão identificar o responsável pela alteração.
+- O motivo deverá ser informado e armazenado para permitir a compreensão posterior da operação.
+- A modelagem e as permissões específicas de consulta aos históricos serão detalhadas durante a implementação.
+
+---
+
+## 3. Modelo inicial da entidade Pessoa
+
+Com base nas decisões anteriores, a entidade `pessoas` deverá contemplar inicialmente os seguintes campos:
 
 | Campo | Descrição |
 |---|---|
 | `id` | Identificador único gerado pelo SQLite |
-| `nome` | Nome do eleitor |
-| `situacao` | Situação global do eleitor: `APTO` ou `INAPTO` |
+| `nome` | Nome da pessoa |
+| `papel` | Papel cadastral atual: `ELEITOR` ou `ADMINISTRADOR` |
+| `situacao` | Situação eleitoral: `APTO` ou `INAPTO` |
 | `criado_em` | Data e hora do cadastro |
 
-A estrutura definitiva será implementada e validada durante o desenvolvimento do módulo de eleitores.
+Toda pessoa deverá ser cadastrada inicialmente com `papel = ELEITOR` e `situacao = APTO`.
+
+A candidatura será representada separadamente, por meio de uma estrutura que relacione a pessoa à eleição correspondente.
+
+Os históricos de papel e de situação eleitoral também serão mantidos em estruturas próprias.
+
+A estrutura definitiva será implementada e validada durante o desenvolvimento dos módulos correspondentes.
 
 ---
 
@@ -288,10 +467,16 @@ As novas decisões deverão seguir o seguinte padrão:
 - **Contexto:** problema ou necessidade que motivou a decisão.
 - **Decisão:** escolha realizada.
 - **Justificativa:** razões que fundamentam a escolha.
-- **Consequências:** impactos técnicos e operacionais da decisão.
+- **Consequências:** impactos técnicos e operacionais da escolha.
 
 Decisões substituídas deverão permanecer registradas, preservando o histórico arquitetural do projeto.
 
 ---
 
 **Observação:** este documento deverá evoluir junto com o VotaSeguro. As decisões registradas representam o entendimento atual da equipe e poderão ser revistas mediante justificativa.
+"""
+
+path = Path("/mnt/data/DECISOES-ARQUITETURAIS-v02.md")
+path.write_text(content, encoding="utf-8")
+print(f"Arquivo criado: {path}")
+print(f"Total de linhas: {len(content.splitlines())}")
